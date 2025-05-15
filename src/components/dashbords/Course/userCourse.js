@@ -1,53 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../sidebar";
 import { Trash2, PenLine, FileX2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const articles = [
-  {
-    category: "Geriatric",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Sandy Gustman",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-  {
-    category: "Wellness and Lifestyle",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Albert Flores",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-  {
-    category: "Sports Rehabilitation",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Kristin Watson",
-    date: "July 23, 2024",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    category: "Neurological",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Jane Cooper",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-];
+import { ApiFetchRequest } from "../../../axios/commonRequest";
+import { FaCopy } from "react-icons/fa";
 
 const UserallCourse = () => {
   const navigate = useNavigate();
 
+  const [allCourse, setAllCourse] = useState([]);
+  console.log(allCourse, "allCourse");
+
+  useEffect(() => {
+    const fetchAllCourse = async () => {
+      try {
+        const response = await ApiFetchRequest("/found-all-course");
+
+        if (response.status === 200) {
+          setAllCourse(response.data.allCourses);
+        } else {
+          console.log("Error fetching AllCourse");
+        }
+      } catch (error) {
+        console.error("Error fetching AllCourse", error);
+      }
+    };
+    fetchAllCourse();
+  }, []);
+
   return (
     <div className="bg-[#F9FAFB] min-h-screen flex flex-col">
       <div className="flex flex-1">
-        <Sidebar />
+        <Sidebar allCourse={allCourse} />
 
         <div className="ml-20 py-8 w-full">
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-6xl">
             {/* Header */}
             <div className="flex justify-between items-center mb-2">
               <div>
@@ -60,54 +47,59 @@ const UserallCourse = () => {
                 <button className="bg-gray-400 text-white p-2 rounded-[12px] font-medium text-[16px]">
                   Featured
                 </button>
-              
               </div>
             </div>
 
             {/* Articles Section */}
-            <div className="bg-white rounded-xl shadow p-6 mt-4">
+            <div className="bg-white rounded-xl shadow p-6 mt-4 overflow-y-scroll h-150">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-blue-500 text-lg">★</span>
-                <span className="font-medium text-gray-700">Featured Articles</span>
+                <span className="font-medium text-gray-700">
+                  Featured Articles
+                </span>
               </div>
 
               <div>
-                {articles.length ? (
-                  articles.map((a, idx) => (
+                {allCourse?.length ? (
+                  allCourse?.map((a, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-center justify-between gap-4 py-6 ${
-                        idx !== articles.length - 1 ? "border-b border-gray-200" : ""
+                      className={`flex items-center justify-between gap-10 py-6 ${
+                        idx !== allCourse.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
                       }`}
                     >
                       {/* Left: Image */}
-                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                        {a.avatar ? (
+                      <div className="w-60 h-42 rounded-md  bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {a.courseImage ? (
                           <img
-                            src={a.avatar}
+                            src={a.courseImage}
                             alt={a.author}
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-gray-400 text-xs">No Image</span>
+                          <span className="text-gray-400 text-xs">
+                            No Image
+                          </span>
                         )}
                       </div>
 
                       {/* Middle: Content */}
                       <div className="flex-1">
-                        <div className={`text-sm font-semibold ${a.categoryColor}`}>
-                          {a.category}
-                        </div>
                         <div className="text-gray-800 font-medium text-[15px] leading-snug mt-1">
-                          {a.title}
+                          {a.courseName}
                         </div>
-                        <div className="flex items-center text-xs text-gray-500 gap-2 mt-1">
-                          <span>{a.author}</span>
-                          <span>•</span>
-                          <span>{a.date}</span>
+                        <div className="flex items-center text-md gap-2 mt-1">
+                          <span className="line-clamp-3">{a.courseDescription}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 gap-2 mt-1">
+                          <FaCopy className="text-gray-500 cursor-pointer" />
+                          <span>{a.total_number_of_quize}</span>
+                          <span>{a.categories}</span>
+                          <span>{a.isFree ?"free" :"paid"}</span>
                         </div>
                       </div>
-
                     </div>
                   ))
                 ) : (
@@ -116,10 +108,11 @@ const UserallCourse = () => {
                       <FileX2 size={40} className="text-gray-400" />
                     </div>
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                      Your Blog is Empty
+                      Your Courses is Empty
                     </h2>
                     <p className="text-sm text-gray-500 max-w-sm">
-                      You haven't posted any articles yet. Start creating content to engage and inform your audience.
+                      You haven't posted any articles yet. Start creating
+                      content to engage and inform your audience.
                     </p>
                   </div>
                 )}

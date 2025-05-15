@@ -1,42 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../sidebar";
+import { ApiFetchRequest } from "../../../axios/commonRequest";
+import { FileX2 } from "lucide-react";
 
-const articles = [
-  {
-    category: "Geriatric",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Sandy Gustman",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-  {
-    category: "Wellness and Lifestyle",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Albert Flores",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-  {
-    category: "Sports Rehabilitation",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Kristin Watson",
-    date: "July 23, 2024",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    category: "Neurological",
-    categoryColor: "text-blue-500",
-    title: "Unlocking the Secrets of Movement: Advanced Techniques for Enhancing Physiotherapy Outcomes",
-    author: "Jane Cooper",
-    date: "July 23, 2024",
-    avatar: null,
-  },
-];
 
-export default function BlogPage() {
+const  BlogPage = () => {
+  const [publicBlogs, setPublicBlogs] = useState([]);
+
+    useEffect(() => {
+      const fetchAllBlogs = async () => {
+        try {
+          const response = await ApiFetchRequest("/found-all-blogs");
+          console.log(response.data, "API Response");
+  
+          if (response.status === 200) {
+            setPublicBlogs(response.data.publicBlog || []);
+          }
+        } catch (error) {
+         
+          console.error("Error fetching blogs", error);
+        }
+      };
+  
+      fetchAllBlogs();
+    }, []);
+
   return (
     <div className="bg-[#F9FAFB] min-h-screen flex flex-col">
       {/* Main Row: Sidebar + Main Content + Right Sidebar */}
@@ -45,7 +33,7 @@ export default function BlogPage() {
           <Sidebar />
         {/* Main Content */}
         <div className="flex-1 flex justify-center py-8">
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-6xl">
             {/* Header */}
             <div className="flex justify-between items-center mb-2">
               <div>
@@ -70,97 +58,66 @@ export default function BlogPage() {
                 <span className="text-blue-500 text-lg">★</span>
                 <span className="font-medium text-gray-700">Featured Articles</span>
               </div>
-              <div>
-                {articles.map((a, idx) => (
-                  <div
-                    key={idx}
-                    className={`py-8 ${idx !== articles.length - 1 ? "border-b" : ""} border-gray-100`}
-                  >
-                    <div className={`text-sm font-semibold mb-1 ${a.categoryColor}`}>
-                      {a.category}
-                    </div>
-                    <div className="font-medium text-gray-800 mb-1 leading-snug">
-                      {a.title}
-                    </div>
-                    <div className="flex items-center text-xs text-gray-500 gap-2">
-                      {a.avatar && (
+               <div className="mt-6">
+                {publicBlogs.length > 0 ? (
+                  publicBlogs.map((blog, idx) => (
+                    <div
+                      key={blog._id}
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-6 border-b last:border-none"
+                    >
+                      {/* Left: Thumbnail + Content */}
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        {/* Thumbnail */}
                         <img
-                          src={a.avatar}
-                          alt={a.author}
-                          className="w-5 h-5 rounded-full object-cover"
+                          src={blog.coverBlogImage}
+                          alt={blog.title}
+                          className="w-28 h-28 object-cover rounded-lg shadow"
                         />
-                      )}
-                      <span>{a.author}</span>
-                      <span>•</span>
-                      <span>{a.date}</span>
+
+                        {/* Blog Info */}
+                        <div className="space-y-1 max-w-lg">
+                          <div className="text-lg font-semibold text-blue-500">
+                            {blog.title}
+                          </div>
+                          <h3 className="text-xs text-gray-800 font-semibold uppercase">
+                            {blog.category}
+                          </h3>
+                          <p className="text-md text-gray-600 line-clamp-2">
+                            {blog.shortDescription}
+                          </p>
+                          <div className="text-xs text-gray-400 mt-2">
+                            By {blog.blogCreatedBy?.fullName} •{" "}
+                            {new Date(blog.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+                    <div className="bg-gray-100 p-6 rounded-full mb-4">
+                      <FileX2 size={40} className="text-gray-400" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                      No Blogs Found
+                    </h2>
+                    <p className="text-sm text-gray-500 max-w-sm">
+                      There are no blogs available. Start
+                      creating content to engage your audience.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
-            {/* View All Button */}
-            <div className="flex justify-center mt-6">
-              <button className="bg-blue-500 text-white px-6 py-2 rounded font-medium shadow hover:bg-blue-600 transition">
-                View All
-              </button>
-            </div>
+          
           </div>
-          {/* Right Sidebar */}
-          <div className="ml-8 w-80">
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                alt="Newsletter"
-                className="w-16 h-16 mb-2"
-              />
-              <h3 className="font-semibold text-md mb-1 text-center">Subscribe to Our Newsletter</h3>
-              <p className="text-xs text-gray-500 text-center mb-3">
-                Stay up-to-date with the latest news, articles from PhysioHub. Enter your email below to subscribe to our newsletter.
-              </p>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded font-medium shadow hover:bg-blue-600 transition text-sm">
-                Subscribe Now
-              </button>
-            </div>
-          </div>
+      
         </div>
       </div>
-      {/* Footer */}
-      <footer className="bg-white border-t mt-8 py-6">
-        <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-blue-500">PhysioHub</span>
-            <span className="text-xs text-gray-400">|</span>
-            <span className="text-xs text-gray-500">mail@example.com</span>
-          </div>
-          <div className="flex gap-8 text-xs text-gray-500">
-            <div>
-              <div className="font-semibold text-gray-700 mb-1">Features</div>
-              <div>Quiz</div>
-              <div>Flash Card</div>
-              <div>Mock Test</div>
-            </div>
-            <div>
-              <div className="font-semibold text-gray-700 mb-1">Articles</div>
-              <div>Our Blogs</div>
-              <div>Rehab Protocols</div>
-            </div>
-            <div>
-              <div className="font-semibold text-gray-700 mb-1">Resources</div>
-              <div>About Us</div>
-              <div>Contact</div>
-            </div>
-            <div>
-              <div className="font-semibold text-gray-700 mb-1">Extra</div>
-              <div>Customer Support</div>
-              <div>Privacy Policy</div>
-              <div>Terms & Conditions</div>
-            </div>
-          </div>
-          <div className="text-xs text-gray-400 mt-2">
-            © Copyright 2024, PhysioHub All Rights Reserved
-          </div>
-        </div>
-      </footer>
+ 
     </div>
   );
 }
+
+export default BlogPage

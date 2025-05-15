@@ -26,6 +26,8 @@ export async function ApiPutRequest(url, request){
 export async function ApiPostRequest(url, request){
     try {
         const res = await api.post(`${api_url}${url}`, request)
+        console.log(res,"resflash");
+        
         return res
     } catch (error) {
       throw error
@@ -45,5 +47,6 @@ export async function ApiFetchRequest(url){
         return res
     } catch (error) {
         throw error
+
     }
 }

@@ -31,7 +31,7 @@ export default function TeacherFlashCard() {
         <Sidebar />
 
         <div className="ml-20 py-8 w-full">
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-6xl">
             {/* Header */}
             <div className="flex justify-between items-center mb-2">
               <div>
@@ -51,8 +51,8 @@ export default function TeacherFlashCard() {
             </div>
 
             {/* Articles Section */}
-            <div className="bg-white rounded-xl shadow p-6 mt-4">
-              <div className="max-w-2xl mx-auto space-y-6">
+            <div className="bg-white rounded-xl shadow p-6 mt-4 overflow-y-scroll h-180">
+              <div className="max-w-6xl mx-auto space-y-6">
                 {flashcards.map((card) => (
                   <div
                     key={card.id}

@@ -1,42 +1,68 @@
 import React, { useState } from "react";
 import { FaUpload, FaTrash } from "react-icons/fa";
 import Sidebar from "../sidebar";
+import { ApiPostRequest } from "../../../axios/commonRequest";
 const CreateCourse = () => {
   const [cover, setCover] = useState(null);
-  
-    const [formData, setFormData] = useState({
-      title: '',
-      description: '',
-      categories: '',
-      price: '',
-      lesson: '',
-      quiz: '',
-      duration: '',
-      cover: null
-    });
-  
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({
+
+  const [formData, setFormData] = useState({
+    courseName: "",
+    courseDescription: "",
+    coursePrice: "",
+    categories: "",
+    courseImage: "",
+    courseDuration: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCover(URL.createObjectURL(file));
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        courseImage: file,
       }));
-    };
-  
-    const handleCoverChange = (e) => {
-      if (e.target.files[0]) {
-        setFormData(prev => ({
-          ...prev,
-          cover: URL.createObjectURL(e.target.files[0])
-        }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = new FormData();
+
+      payload.append("courseName", formData.courseName);
+      payload.append("courseDescription", formData.courseDescription);
+      payload.append("coursePrice", formData.coursePrice);
+      payload.append("categories", formData.categories);
+      payload.append("courseDuration", formData.courseDuration);
+
+      if(formData.courseImage){
+      payload.append("courseImage",formData.courseImage)
       }
-    };
-  
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      // Handle form submission here
-      console.log(formData);
-    };
+
+      const response = await ApiPostRequest("/create-course", payload);
+      if (response.status === 200) {
+        setFormData({
+          courseName: "",
+          courseDescription: "",
+          coursePrice: "",
+          categories: "",
+          courseImage: "",
+          courseDuration: "",
+        });
+        console.log(response.data, "corse response");
+      }
+    } catch (error) {}
+    console.log(formData);
+  };
 
   return (
     <div className="flex gap-20 min-h-screen bg-[#f6f8fb]">
@@ -47,21 +73,33 @@ const CreateCourse = () => {
           <h2 className="text-xl font-bold  flex items-center gap-2">
             <span className="text-gray-500">&larr;</span> Back
           </h2>
-          <button className="bg-purple-600 text-white font-bold p-2 w-[12%] rounded-md">
-            Publish
-          </button>
+     
         </div>
         {/* Personal Info */}
         <div className="bg-white rounded-xl shadow p-8 mb-6 mt-5">
+
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Create course</h2>
+                 <button
+            className="bg-purple-600 text-white font-bold cursor-pointer p-2 w-[12%] rounded-md"
+            onClick={handleSubmit}
+          >
+            Publish
+          </button>
+          </div>
           {/* Form */}
           <form className="gap-4">
-            <div className="col-span-1 mt-2">
+            <div className="col-span-1 mt-5">
               <label className="block text-sm text-gray-600 font-semibold mb-1">
                 Title
               </label>
               <input
-                className="w-full border border-neutral-200 rounded-md px-3 py-2"
+                type="text"
+                value={formData.courseName}
+                onChange={handleChange}
+                name="courseName"
                 placeholder="Write question here"
+                className="w-full border border-neutral-200 rounded-md px-3 py-2"
               />
             </div>
             <div className="col-span-1 mt-2">
@@ -69,6 +107,10 @@ const CreateCourse = () => {
                 Description
               </label>
               <input
+                type="text"
+                value={formData.courseDescription}
+                onChange={handleChange}
+                name="courseDescription"
                 className="w-full border border-neutral-200 rounded-md px-3 py-2"
                 placeholder="write description here"
               />
@@ -81,6 +123,10 @@ const CreateCourse = () => {
                 Type Categories Seprated by coma ","
               </p>
               <input
+                type="text"
+                value={formData.categories}
+                onChange={handleChange}
+                name="categories"
                 className="w-full border border-neutral-200 rounded-md px-3 py-2"
                 placeholder="e.g Orthopedic,Neurological,Pediatric"
               />
@@ -90,9 +136,12 @@ const CreateCourse = () => {
                 Price
               </label>
               <input
+                type="Number"
+                value={formData.coursePrice}
+                onChange={handleChange}
+                name="coursePrice"
                 className="w-full border border-neutral-200 rounded-md px-3 py-2"
                 placeholder="Enter price"
-                type="Number"
               />
             </div>
             <div className="flex items-center gap-10">
@@ -120,6 +169,10 @@ const CreateCourse = () => {
                 {"Estimated Duration " + "(" + "In Minnutes" + ")"}
               </label>
               <input
+                type="text"
+                value={formData.courseDuration}
+                onChange={handleChange}
+                name="courseDuration"
                 className="w-full border border-neutral-200 rounded-md px-3 py-2"
                 placeholder="Enter your valid email here"
               />
@@ -136,15 +189,11 @@ const CreateCourse = () => {
                 <input
                   type="file"
                   className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files[0]) {
-                      setCover(URL.createObjectURL(e.target.files[0]));
-                    }
-                  }}
+                  onChange={handleCoverChange}
                 />
                 {cover && (
                   <img
-                    src={cover}
+                    src={formData.courseImage}
                     alt="Cover"
                     className="mt-2 h-16 object-cover rounded"
                   />
