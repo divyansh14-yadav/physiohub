@@ -1,8 +1,8 @@
 // LottiePlayer.js
+import Lottie from "lottie-react";
 import React from "react";
-import dynamic from 'next/dynamic';
 
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+import("lottie-react")
 
 // Dynamic Lottie animation component
 const LottiePlayer = ({ animationFile, width = "100px", height = "100px", loop = true }) => {

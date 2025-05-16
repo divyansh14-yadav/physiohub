@@ -15,7 +15,8 @@ const CreateFlashcard = () => {
   const [frontImg, setFrontImg] = useState(null);
   const [backImg, setBackImg] = useState(null);
   const [cover, setCover] = useState(null);
-  const [openModalforCreateToipcs, setOpenModalForCreateToipcs] = useState(false);
+  const [openModalforCreateToipcs, setOpenModalForCreateToipcs] =
+    useState(false);
 
   const [topicFlashName, setTopicFlashName] = useState("");
 
@@ -30,6 +31,24 @@ const CreateFlashcard = () => {
 
   const [updatedflashCardLevelData, setUpdatedflashCardLevelData] =
     useState(false);
+
+  const [coverFile, setCoverFile] = useState(null);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    hint: "",
+    subject: "",
+    masteryLevel: "",
+    confidance_level: "",
+    flash_topics: "",
+    flashImage: "",
+    frontTitle: "",
+    frontImage: "",
+    backTitle: "",
+    backImage: "",
+  });
+  console.log(formData, "flashformdata");
 
   const token = JSON.parse(localStorage.getItem("token"));
 
@@ -98,6 +117,67 @@ const CreateFlashcard = () => {
     fetchAllFlashCardLevel();
   }, [updatedflashCardLevelData]);
 
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  setFormData((prevData) => ({
+    ...prevData,
+    [name]: value,
+  }));
+};
+
+  const handleCreateFlashCard = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = new FormData();
+
+      payload.append("title", formData.title);
+      payload.append("description", formData.description);
+      payload.append("hint", formData.hint);
+      payload.append("subject", formData.subject);
+      payload.append("masteryLevel", formData.masteryLevel);
+      payload.append("confidance_level", formData.confidance_level);
+      payload.append("flash_topics", formData.flash_topics);
+
+      if (formData.flashImage) {
+        payload.append("flashImage", formData.flashImage);
+      }
+
+      payload.append("frontTitle", formData.frontTitle);
+
+      if (formData.frontImage) {
+        payload.append("frontImage", formData.frontImage);
+      }
+
+      payload.append("backTitle", formData.backTitle);
+
+      if (formData.backImage) {
+        payload.append("backImage", formData.backImage);
+      }
+
+      const response = await ApiPostRequest("/create-flash-card", payload);
+      console.log(response, "CreateFlashCardTopic response");
+
+      if (response?.status === 200) {
+        setFormData({
+          title: "",
+          description: "",
+          hint: "",
+          subject: "",
+          masteryLevel: "",
+          confidance_level: "",
+          flash_topics: "",
+          flashImage: "",
+          frontTitle: "",
+          frontImage: "",
+          backTitle: "",
+          backImage: "",
+        });
+      }
+    } catch (error) {
+      console.error("flashcard error:", error);
+    }
+  };
   return (
     <div className="flex min-h-screen bg-[#f6f8fb]">
       {/* Sidebar */}
@@ -116,6 +196,7 @@ const CreateFlashcard = () => {
             <button
               type="button"
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg"
+              onClick={handleCreateFlashCard}
             >
               Create
             </button>
@@ -127,6 +208,9 @@ const CreateFlashcard = () => {
             <input
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write question here"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -136,6 +220,9 @@ const CreateFlashcard = () => {
             <input
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write description here"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -145,6 +232,9 @@ const CreateFlashcard = () => {
             <input
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write Hint here"
+              name="hint"
+              value={formData.hint}
+              onChange={handleChange}
             />
           </div>
           <div className="flex gap-4">
@@ -155,6 +245,9 @@ const CreateFlashcard = () => {
               <input
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                 placeholder="Write Subject here"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
               />
             </div>
             <div className="flex-1">
@@ -164,34 +257,51 @@ const CreateFlashcard = () => {
               <input
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                 placeholder="0"
+                name="masteryLevel"
+                value={formData.masteryLevel}
+                onChange={handleChange}
               />
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex-1 flex gap-2 items-center">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Confidence Level
               </label>
-              <select className="w-full border border-gray-300 rounded-lg px-4 py-2.5">
+              <select
+                className="w-full border border-gray-300 rounded-lg px-2 py-2.5"
+                name="confidance_level"
+                // value={formData.confidance_level}
+                onChange={handleChange}
+              >
                 <option>Choose Level</option>
                 {allFlashCardLevel?.map((flashlevel, index) => (
-                  <option>{flashlevel.confidance_level}</option>
+                  <option key={index} value={flashlevel._id}>
+                    {flashlevel.confidance_level}
+                  </option>
                 ))}
               </select>
             </div>
+
             <div className="flex-1 flex gap-2 items-end">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Topic
                 </label>
-                <select className="w-full border border-gray-300 rounded-lg px-4 py-2.5">
-                  <option>Choose Topics</option>
-                  {allFlashCardTopic?.map((topics) => (
-                    <option>{topics.topicFlashName}</option>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
+                  name="flash_topics"
+                  onChange={handleChange}
+                >
+                  <option value="">Choose Topics</option>
+                  {allFlashCardTopic?.map((topic, index) => (
+                    <option key={index} value={topic._id}>
+                      {topic.topicFlashName}
+                    </option>
                   ))}
-                  {/* Add more topics as needed */}
                 </select>
               </div>
+
               <button
                 type="button"
                 className="h-10 px-4 py-2.5 bg-purple-50 border-purple-200 rounded-lg text-sm font-semibold"
@@ -214,8 +324,14 @@ const CreateFlashcard = () => {
                       type="file"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files[0]) {
-                          setCover(URL.createObjectURL(e.target.files[0]));
+                        const file = e.target.files[0];
+                        if (file) {
+                          setCover(URL.createObjectURL(file));
+                          setCoverFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            flashImage: file,
+                          }));
                         }
                       }}
                     />
@@ -241,8 +357,14 @@ const CreateFlashcard = () => {
                       type="file"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files[0]) {
-                          setCover(URL.createObjectURL(e.target.files[0]));
+                        const file = e.target.files[0];
+                        if (file) {
+                          setCover(URL.createObjectURL(file));
+                          setCoverFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            flashImage: file,
+                          }));
                         }
                       }}
                     />
@@ -304,8 +426,13 @@ const CreateFlashcard = () => {
                     ref={frontInputRef}
                     className="hidden"
                     onChange={(e) => {
-                      if (e.target.files[0]) {
-                        setFrontImg(URL.createObjectURL(e.target.files[0]));
+                      const file = e.target.files[0];
+                      if (file) {
+                        setFrontImg(URL.createObjectURL(file));
+                        setFormData((prev) => ({
+                          ...prev,
+                          frontImage: file,
+                        }));
                       }
                     }}
                   />
@@ -317,6 +444,9 @@ const CreateFlashcard = () => {
                   <input
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                     placeholder="Front Content"
+                    name="frontTitle"
+                    value={formData.frontTitle}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -370,8 +500,13 @@ const CreateFlashcard = () => {
                     ref={backInputRef}
                     className="hidden"
                     onChange={(e) => {
-                      if (e.target.files[0]) {
-                        setBackImg(URL.createObjectURL(e.target.files[0]));
+                      const file = e.target.files[0];
+                      if (file) {
+                        setBackImg(URL.createObjectURL(file));
+                        setFormData((prev) => ({
+                          ...prev,
+                          backImage: file,
+                        }));
                       }
                     }}
                   />
@@ -383,6 +518,9 @@ const CreateFlashcard = () => {
                   <input
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                     placeholder="Back Content"
+                    name="backTitle"
+                    value={formData.backTitle}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
