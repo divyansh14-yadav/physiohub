@@ -11,16 +11,17 @@ import { Image as ImageIcon, Video } from "lucide-react";
 import { Clock, BookOpen, CheckCircle, XCircle } from "lucide-react";
 
 const TeacherLesson = () => {
-  const navigate = useNavigate();
-
+  
   const [allLesson, setAllLesson] = useState([]);
   const [openModalforCourse, setOpenModalForCourse] = useState(false);
   const [courseDeleteId, setCourseDeleteId] = useState("");
   const [updatedData, setUpdatedData] = useState(false);
   const [activeTabs, setActiveTabs] = useState({}); // <-- Per-lesson tab state
+  
+  const navigate = useNavigate();
 
   const handleCloseCourse = () => setOpenModalForCourse(false);
-
+  
   const handleShowCourse = (id) => {
     setCourseDeleteId(id);
     setOpenModalForCourse(true);
@@ -203,7 +204,7 @@ const TeacherLesson = () => {
                       {/* Right: Actions */}
                       <div className="flex gap-2">
                         <button className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300">
-                          <PenLine size={18} />
+                          <PenLine onClick={()=>navigate("/CreateLesson",{state:{isformOpen:true,data:lesson}})} size={18} />
                         </button>
                         <button
                           className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300"

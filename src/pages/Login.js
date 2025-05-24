@@ -14,6 +14,14 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleAttendance = async () => {
+    try {
+      const response = await ApiPostRequest("/user/attendance");
+    } catch (error) {
+      console.error("attendance error:", error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -21,12 +29,14 @@ const Login = () => {
       console.log(response, "login response");
 
       if (response?.status === 200) {
-        const { token, role } = response.data;
+        const { token, role,authId } = response.data;
         localStorage.setItem("token", JSON.stringify(token));
         localStorage.setItem("role", JSON.stringify(role));
+        localStorage.setItem("id", JSON.stringify(authId));
         setFormData({ email: "", password: "" });
         navigate("/");
       }
+      handleAttendance();
     } catch (error) {
       const message = error?.response?.data?.message || "";
       if (message.includes("verify")) {
@@ -90,13 +100,17 @@ const Login = () => {
             <div className="w-2 h-16 bg-purple-600 rounded-md animate-bounce-tube [animation-delay:0.7s]" />
             <div className="w-2 h-12 bg-purple-500 rounded-md animate-bounce-tube [animation-delay:0.9s]" />
           </div>
-          <p className="mt-3 font-medium text-purple-700">Performance Overview</p>
+          <p className="mt-3 font-medium text-purple-700">
+            Performance Overview
+          </p>
         </div>
       </div>
 
       {/* Right Section */}
       <div className="w-[60%] bg-white p-10 flex flex-col justify-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Login to Your Account</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          Login to Your Account
+        </h2>
         <p className="text-gray-500 mb-6">
           Access your personalized dashboard by logging in below.
         </p>

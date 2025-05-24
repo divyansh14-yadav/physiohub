@@ -28,6 +28,11 @@ import TeacherQuiz from "./components/dashbords/quiz/teacherQuiz";
 import TeacherLesson from "./components/dashbords/lesson/teacherLesson";
 import CreateLesson from "./components/dashbords/lesson/createLesson";
 import FlashcardDetails from "./components/dashbords/flashcard/detailed/flashcardDetails";
+import CreateQuiz from "./components/dashbords/quiz/createQuiz";
+import BlogDetails from "./components/dashbords/blogs/detailed/detailedblog";
+import BlogSingle from "./components/dashbords/blogs/detailed/singleDetailedBlog";
+import GetStartedQuiz from "./components/dashbords/quiz/getStartedQuiz";
+import StartQuiz from "./components/dashbords/quiz/startQuiz";
 
 function App() {
   const location = useLocation();
@@ -46,6 +51,11 @@ function App() {
         <Route path='/discover' element={<Discover />}></Route>
         <Route path='/blogs' element={<BlogPage />}></Route>
         <Route path='/flashCardDetails/:subject' element={<FlashcardDetails />}></Route>
+        <Route path='/BlogDetails/:category' element={<BlogDetails />}></Route>
+        <Route path='/BlogSingle/:_id' element={<BlogSingle />}></Route>
+        <Route path='/GetstartQuiz' element={<GetStartedQuiz />}></Route>
+        <Route path='/StartQuiz/:quiztopic' element={<StartQuiz />}></Route>
+
 
         <Route path='/TeacherBlogs' element={<TeacherBlogs />}></Route>
         <Route path='/CreateBlogs' element={<CreateBlog />}></Route>
@@ -55,6 +65,7 @@ function App() {
         <Route path='/createFlashCard' element={< CreateFlashcard/>}></Route>
         <Route path='/teacherFlashCard' element={< TeacherFlashCard/>}></Route>
         <Route path='/userFlashCard' element={< UserFlashcard/>}></Route>
+        <Route path='/createQuiz' element={< CreateQuiz/>}></Route>
         <Route path='/userQuiz' element={< Userquiz/>}></Route>
         <Route path='/teacherQuiz' element={< TeacherQuiz/>}></Route>
 

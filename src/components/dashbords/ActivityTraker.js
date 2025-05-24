@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ApiFetchRequest } from '../../axios/commonRequest';
 
 const ActivityTracker = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [attendance, setAttendance] = useState({});
+  const [allAttendance, setAllAttendance] = useState({});
+  const id = JSON.parse(localStorage.getItem("id"));
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -13,17 +15,15 @@ const ActivityTracker = () => {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
 
-  const toggleAttendance = (day) => {
-    const dateKey = `${currentYear}-${currentMonth}-${day}`;
-    setAttendance(prev => ({
-      ...prev,
-      [dateKey]: !prev[dateKey]
-    }));
-  };
-
   const getAttendanceStatus = (day) => {
-    const dateKey = `${currentYear}-${currentMonth}-${day}`;
-    return attendance[dateKey] ? 'bg-green-500' : 'bg-purple-500';
+    const paddedMonth = String(currentMonth + 1).padStart(2, '0');
+    const paddedDay = String(day).padStart(2, '0');
+    const dateKey = `${currentYear}-${paddedMonth}-${paddedDay}`;
+    const status = allAttendance[dateKey];
+
+    if (status === 'present') return 'bg-green-500';
+    if (status === 'absent') return 'bg-purple-500';
+    return 'bg-gray-300'; // no data
   };
 
   const changeMonth = (increment) => {
@@ -40,6 +40,22 @@ const ActivityTracker = () => {
       return newMonth;
     });
   };
+
+  useEffect(() => {
+    const fetchAllAttendance = async () => {
+      try {
+        const response = await ApiFetchRequest(`/user/get-attandance/${id}`);
+        if (response.status === 200) {
+          setAllAttendance(response.data.attendance || {});
+        } else {
+          console.log("Error fetching attendance");
+        }
+      } catch (error) {
+        console.error("Error fetching attendance", error);
+      }
+    };
+    fetchAllAttendance();
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -78,8 +94,7 @@ const ActivityTracker = () => {
             return (
               <div
                 key={day}
-                onClick={() => toggleAttendance(day)}
-                className={`h-12 flex items-center justify-center rounded cursor-pointer transition ${getAttendanceStatus(day)}`}
+                className={`h-12 flex items-center justify-center rounded cursor-default transition ${getAttendanceStatus(day)}`}
               >
                 <span className="text-white font-medium">{day}</span>
               </div>
@@ -96,10 +111,14 @@ const ActivityTracker = () => {
             <div className="w-4 h-4 bg-purple-500 rounded mr-2"></div>
             <span className="text-gray-600">Absent</span>
           </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+            <span className="text-gray-600">No Data</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default ActivityTracker; 
+export default ActivityTracker;

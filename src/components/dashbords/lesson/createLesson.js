@@ -284,11 +284,11 @@
 
 // export default CreateLesson;
 
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUpload } from "react-icons/fa";
 import Sidebar from "../sidebar";
-import { ApiPostRequest } from "../../../axios/commonRequest";
+import { ApiPostRequest, ApiPutRequest } from "../../../axios/commonRequest";
+import { Link, useLocation } from "react-router-dom";
 
 const CreateLesson = () => {
   const [imagePreview, setImagePreview] = useState(null);
@@ -305,6 +305,23 @@ const CreateLesson = () => {
     contentText: "",
   });
 
+  const { isformOpen, data } = useLocation().state || {};
+
+  console.log(data, "lessonnaigateDtata");
+
+  console.log(isformOpen, "leesonformopen");
+
+  useEffect(() => {
+    if (data) {
+      setFormData({
+        ...data,
+        contentText: data.content.contentText,
+      });
+      setImagePreview(data.content.contentImage);
+      setVideoPreview(data.content.contentVideo);
+    }
+  }, [data, isformOpen]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -313,23 +330,21 @@ const CreateLesson = () => {
     }));
   };
 
- const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    setImagePreview(URL.createObjectURL(file));
-    setImageFile(file);
-  }
-};
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+      setImageFile(file);
+    }
+  };
 
-
-const handleVideoChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    setVideoPreview(URL.createObjectURL(file));
-    setVideoFile(file);
-  }
-};
-
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setVideoPreview(URL.createObjectURL(file));
+      setVideoFile(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -350,7 +365,7 @@ const handleVideoChange = (e) => {
         payload.append("content[contentVideo]", videoFile);
       }
 
-      const response = await ApiPostRequest("/create-lesson", payload);
+      const response = await isformOpen ? ApiPutRequest(`/update-lesson/${data._id}` , payload) : ApiPostRequest("/create-lesson", payload);
 
       if (response.status === 200) {
         setFormData({
@@ -378,18 +393,21 @@ const handleVideoChange = (e) => {
       <Sidebar />
       <div className="mt-5 w-[70%]">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <span className="text-gray-500">&larr;</span> Back
-          </h2>
+          <Link
+            to={"/teacherLesson"}
+            className="text-xl font-bold flex items-center gap-2"
+          >
+            &larr; Back
+          </Link>
         </div>
         <div className="bg-white rounded-xl shadow p-8 mb-6 mt-5">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Create Lesson</h2>
+            <h2 className="text-2xl font-bold">{isformOpen ? "Update Lesson" : "Create Lesson"}</h2>
             <button
               className="bg-purple-600 text-white font-bold cursor-pointer p-2 w-[12%] rounded-md"
               onClick={handleSubmit}
             >
-              Publish
+              {isformOpen ? " Update" : "Create"}
             </button>
           </div>
 
@@ -478,7 +496,7 @@ const handleVideoChange = (e) => {
             </div>
 
             {/* Image Upload */}
-            <div className="w-full mt-6">
+            {/* <div className="w-full mt-6">
               <h2 className="font-semibold text-[#191925]">Cover Image</h2>
               <div className="border-2 h-[250px] border-gray-300 border-dashed flex justify-center items-center mt-3">
                 {!imagePreview ? (
@@ -504,10 +522,10 @@ const handleVideoChange = (e) => {
                   />
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Video Upload */}
-            <div className="w-full mt-6">
+            {/* <div className="w-full mt-6">
               <h2 className="font-semibold text-[#191925]">Cover Video</h2>
               <div className="border-2 h-[250px] border-gray-300 border-dashed flex justify-center items-center mt-3">
                 {!videoPreview ? (
@@ -530,7 +548,97 @@ const handleVideoChange = (e) => {
                   />
                 )}
               </div>
+            </div> */}
+
+<div className="border-2 w-full h-[250px] border-gray-300 border-dashed flex justify-center items-center mt-3">
+              {!imagePreview ? (
+                <label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <div className="text-center">
+                    <img
+                      className="m-auto mt-19"
+                      // src={upload}
+                      alt="Upload Icon"
+                    />
+                    <h1 className="text-[#191925] font-semibold mt-2">
+                      Drag or drop image here
+                    </h1>
+                    <p className="text-[#8996A9] pr-3 pl-3">
+                      Image should be horizontal, at least 1500 x 500 px
+                    </p>
+                  </div>
+                </label>
+              ) : (
+                <div className="relative w-full h-full group">
+                  <img
+                    src={imagePreview}
+                    alt="Selected Cover"
+                    className="w-full h-full object-cover rounded"
+                  />
+                  {/* Show change image button on hover */}
+                  <label className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                    Change Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
+
+<div className="border-2 w-full h-[250px] border-gray-300 border-dashed flex justify-center items-center mt-3">
+              {!videoPreview ? (
+                <label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="hidden"
+                  />
+                  <div className="text-center">
+                    <img
+                      className="m-auto mt-19"
+                      // src={upload}
+                      alt="Upload Icon"
+                    />
+                    <h1 className="text-[#191925] font-semibold mt-2">
+                      Drag or drop image here
+                    </h1>
+                    <p className="text-[#8996A9] pr-3 pl-3">
+                      Image should be horizontal, at least 1500 x 500 px
+                    </p>
+                  </div>
+                </label>
+              ) : (
+                <div className="relative w-full h-full group">
+                  <video
+                    src={videoPreview}
+                    alt="Selected Video"
+                    className="w-full h-full object-cover"
+                    controls
+                  />
+                  {/* Show change image button on hover */}
+                  <label className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                    Change Video
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
           </form>
         </div>
       </div>

@@ -159,7 +159,9 @@ export default function TeacherBlogs() {
                       {/* Right: Actions */}
                       <div className="flex gap-2 self-end sm:self-auto">
                         <button className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700">
-                          <PenLine size={18} />
+                          <PenLine 
+                          onClick={()=> navigate("/createBlogs", {state : {isOpen : true, allData : blog}})}
+                          size={18} />
                         </button>
                         <button className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-purple-600">
                           <Trash2

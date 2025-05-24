@@ -62,7 +62,7 @@ const TeacherFlashCard = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-2">
               <div>
-                <h2 className="text-xl font-semibold">&larr; FlashCard</h2>
+                <h2 className="text-xl font-semibold">FlashCard</h2>
               </div>
               <div className="flex items-center gap-2">
                 {/* <button className="bg-gray-400 text-white p-2 rounded-[12px] font-medium text-[16px]">
@@ -151,7 +151,7 @@ const TeacherFlashCard = () => {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <button className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300">
-                        <PenLine size={18} />
+                        <PenLine size={18} onClick={()=>navigate("/createFlashCard",{state:{isformOpen:true,data:card}})}/>
                       </button>
                       <button className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300">
                         <Trash2

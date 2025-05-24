@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../sidebar";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogBackdrop,
@@ -9,7 +9,11 @@ import {
 } from "@headlessui/react";
 import { FaUpload, FaTrash } from "react-icons/fa";
 
-import { ApiFetchRequest, ApiPostRequest } from "../../../axios/commonRequest";
+import {
+  ApiFetchRequest,
+  ApiPostRequest,
+  ApiPutRequest,
+} from "../../../axios/commonRequest";
 
 const CreateFlashcard = () => {
   const [frontImg, setFrontImg] = useState(null);
@@ -49,6 +53,11 @@ const CreateFlashcard = () => {
     backImage: "",
   });
   console.log(formData, "flashformdata");
+
+  const { isformOpen, data } = useLocation().state || {};
+  console.log(data, "55555555555555555555555555555555555555555555flashmapdata");
+
+  const navigate = useNavigate()
 
   const token = JSON.parse(localStorage.getItem("token"));
 
@@ -117,14 +126,14 @@ const CreateFlashcard = () => {
     fetchAllFlashCardLevel();
   }, [updatedflashCardLevelData]);
 
- const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  setFormData((prevData) => ({
-    ...prevData,
-    [name]: value,
-  }));
-};
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const handleCreateFlashCard = async (e) => {
     e.preventDefault();
@@ -155,7 +164,9 @@ const CreateFlashcard = () => {
         payload.append("backImage", formData.backImage);
       }
 
-      const response = await ApiPostRequest("/create-flash-card", payload);
+      const response = (await isformOpen)
+        ? ApiPutRequest(`/update-flash-card/${data._id}`, payload)
+        : await ApiPostRequest("/create-flash-card", payload);
       console.log(response, "CreateFlashCardTopic response");
 
       if (response?.status === 200) {
@@ -174,10 +185,26 @@ const CreateFlashcard = () => {
           backImage: "",
         });
       }
+      navigate("/teacherFlashCard")
     } catch (error) {
       console.error("flashcard error:", error);
     }
   };
+
+  useEffect(() => {
+    if (data) {
+      setFormData({
+        ...data,
+        confidance_level: data.confidance_level?._id || data.confidance_level,
+        flash_topics: data.flash_topics?._id || data.flash_topics,
+        frontTitle:data.container.frontTitle,
+        backTitle:data.container.backTitle
+      });
+      setCover(data.flashImage);
+      setFrontImg(data.container.frontImage);
+      setBackImg(data.container.backImage);
+    }
+  }, [data, isformOpen]);
   return (
     <div className="flex min-h-screen bg-[#f6f8fb]">
       {/* Sidebar */}
@@ -186,19 +213,21 @@ const CreateFlashcard = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center py-8 overflow-y-scroll h-200">
         <div className="flex items-center justify-between w-[80%]">
-          <NavLink to={"teacherFlashCard"} className="text-xl font-semibold">
+          <Link to={"/teacherFlashCard"} className="text-xl font-semibold">
             &larr; back
-          </NavLink>
+          </Link>
         </div>
         <form className="w-full max-w-5xl bg-white rounded-2xl shadow p-8 space-y-5 mt-5">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Create Flash Card</h2>
+            <h2 className="text-2xl font-bold">
+              {isformOpen ? "Update Flash Card" : "Create Flash Card"}
+            </h2>
             <button
               type="button"
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg"
               onClick={handleCreateFlashCard}
             >
-              Create
+              {isformOpen ? "Update" : "Create"}
             </button>
           </div>
           <div>
@@ -209,7 +238,7 @@ const CreateFlashcard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write question here"
               name="title"
-              value={formData.title}
+              value={formData.title || ""}
               onChange={handleChange}
             />
           </div>
@@ -221,7 +250,7 @@ const CreateFlashcard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write description here"
               name="description"
-              value={formData.description}
+              value={formData.description || ""}
               onChange={handleChange}
             />
           </div>
@@ -233,7 +262,7 @@ const CreateFlashcard = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
               placeholder="Write Hint here"
               name="hint"
-              value={formData.hint}
+              value={formData.hint || ""}
               onChange={handleChange}
             />
           </div>
@@ -246,7 +275,7 @@ const CreateFlashcard = () => {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                 placeholder="Write Subject here"
                 name="subject"
-                value={formData.subject}
+                value={formData.subject || ""}
                 onChange={handleChange}
               />
             </div>
@@ -258,7 +287,7 @@ const CreateFlashcard = () => {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                 placeholder="0"
                 name="masteryLevel"
-                value={formData.masteryLevel}
+                value={formData.masteryLevel || ""}
                 onChange={handleChange}
               />
             </div>
@@ -271,10 +300,10 @@ const CreateFlashcard = () => {
               <select
                 className="w-full border border-gray-300 rounded-lg px-2 py-2.5"
                 name="confidance_level"
-                // value={formData.confidance_level}
+                value={formData.confidance_level || ""}
                 onChange={handleChange}
               >
-                <option>Choose Level</option>
+                <option value="">Choose Level</option>
                 {allFlashCardLevel?.map((flashlevel, index) => (
                   <option key={index} value={flashlevel._id}>
                     {flashlevel.confidance_level}
@@ -292,11 +321,12 @@ const CreateFlashcard = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                   name="flash_topics"
                   onChange={handleChange}
+                  value={formData.flash_topics || ""}
                 >
-                  <option value="">Choose Topics</option>
+                  {/* <option value="">Choose Topics</option> */}
                   {allFlashCardTopic?.map((topic, index) => (
                     <option key={index} value={topic._id}>
-                      {topic.topicFlashName}
+                      {topic.topicFlashName || ""}
                     </option>
                   ))}
                 </select>
@@ -445,7 +475,9 @@ const CreateFlashcard = () => {
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                     placeholder="Front Content"
                     name="frontTitle"
-                    value={formData.frontTitle}
+                    value={
+                      formData.frontTitle || ""
+                    }
                     onChange={handleChange}
                   />
                 </div>
@@ -519,7 +551,7 @@ const CreateFlashcard = () => {
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5"
                     placeholder="Back Content"
                     name="backTitle"
-                    value={formData.backTitle}
+                    value={formData.backTitle || ""}
                     onChange={handleChange}
                   />
                 </div>

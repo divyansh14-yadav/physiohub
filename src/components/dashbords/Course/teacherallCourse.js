@@ -148,7 +148,7 @@ const TeacherallCourse = () => {
                       </div>
                       <div className="flex gap-2">
                         <button className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300">
-                          <PenLine size={18} />
+                          <PenLine onClick={()=>navigate("/createCourse",{state:{isformOpen:true,data:a}})} size={18} />
                         </button>
                         <button className="p-2 h-10 rounded-md hover:bg-gray-100 text-gray-600 border border-gray-300">
                           <Trash2
