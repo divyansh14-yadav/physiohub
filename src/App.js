@@ -33,6 +33,7 @@ import BlogDetails from "./components/dashbords/blogs/detailed/detailedblog";
 import BlogSingle from "./components/dashbords/blogs/detailed/singleDetailedBlog";
 import GetStartedQuiz from "./components/dashbords/quiz/getStartedQuiz";
 import StartQuiz from "./components/dashbords/quiz/startQuiz";
+import StepperComponent from "./pages/Onbording/onbording";
 
 function App() {
   const location = useLocation();
@@ -43,6 +44,8 @@ function App() {
         <Route path='/' element={<Home />}></Route>
         <Route path='/register' element={<Register />}></Route>
         <Route path='/login' element={<Login />}></Route>
+        <Route path='/onboarding' element={<StepperComponent />}></Route>
+        
         <Route path='/newPassword' element={<NewPassword />}></Route>
         <Route path='/verifyEmail' element={<VerifyEmail />}></Route>
         <Route path='/OtpVerification' element={<OtpVerification />}></Route>
